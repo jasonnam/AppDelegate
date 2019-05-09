@@ -6,7 +6,7 @@ Pod::Spec.new do |spec|
   spec.authors       = { 'Jason Nam' => 'contact@jasonnam.com' }
   spec.summary       = 'Break down app delegate into smaller and single-purpose plugins.'
   spec.source        = { :git => 'https://github.com/jasonnam/AppDelegate.git', :tag => '0.1.0' }
-  spec.swift_version = '4.2'
+  spec.swift_version = '5.0'
 
   spec.ios.deployment_target = '8.0'
 
