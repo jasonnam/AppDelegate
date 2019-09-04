@@ -10,10 +10,13 @@ Pod::Spec.new do |spec|
 
   spec.ios.deployment_target = '8.0'
 
+  spec.default_subspec = 'Core'
+
   source_files = 'Sources/AppDelegate/*.swift'
 
-  spec.source_files = source_files
-
+  spec.subspec 'Core' do |subspec|
+    subspec.source_files = source_files
+  end
   spec.subspec 'RemoteNotification' do |subspec|
     subspec.source_files = source_files
     subspec.pod_target_xcconfig = {
