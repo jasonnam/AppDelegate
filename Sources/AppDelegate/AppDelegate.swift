@@ -34,15 +34,6 @@ open class AppDelegate: UIResponder, UIApplicationDelegate {
 
     open var window: UIWindow?
 
-    public override init() {
-        super.init()
-    }
-
-    public init(window: UIWindow) {
-        super.init()
-        self.window = window
-    }
-
     @discardableResult
     open func evaluate<Result, Return>(work: (UIApplicationDelegate, @escaping (Result) -> Void) -> Return?, completionHandler: @escaping ([Result]) -> Void) -> [Return] {
         let dispatchGroup = DispatchGroup()
@@ -74,7 +65,7 @@ open class AppDelegate: UIResponder, UIApplicationDelegate {
 
     @available(iOS 2.0, *)
     open func applicationDidFinishLaunching(_ application: UIApplication) {
-        fatalError("Please use application(_:willFinishLaunchingWithOptions:) and application(_:didFinishLaunchingWithOptions:).")
+        plugins.forEach { $0.applicationDidFinishLaunching?(application) }
     }
 
     @available(iOS 6.0, *)
@@ -99,12 +90,12 @@ open class AppDelegate: UIResponder, UIApplicationDelegate {
 
     @available(iOS, introduced: 2.0, deprecated: 9.0)
     open func application(_ application: UIApplication, handleOpen url: URL) -> Bool {
-        fatalError("Please use application(_:open:options:).")
+        return plugins.reduce(false, { $0 || ($1.application?(application, handleOpen: url) ?? false) })
     }
 
     @available(iOS, introduced: 4.2, deprecated: 9.0)
     open func application(_ application: UIApplication, open url: URL, sourceApplication: String?, annotation: Any) -> Bool {
-        fatalError("Please use application(_:open:options:).")
+        return plugins.reduce(false, { $0 || ($1.application?(application, open: url, sourceApplication: sourceApplication, annotation: annotation) ?? false) })
     }
 
     @available(iOS 9.0, *)
@@ -127,29 +118,29 @@ open class AppDelegate: UIResponder, UIApplicationDelegate {
         plugins.forEach { $0.applicationSignificantTimeChange?(application) }
     }
 
-    @available(iOS 2.0, *)
+    @available(iOS, introduced: 2.0, deprecated: 13.0)
     open func application(_ application: UIApplication, willChangeStatusBarOrientation newStatusBarOrientation: UIInterfaceOrientation, duration: TimeInterval) {
         plugins.forEach { $0.application?(application, willChangeStatusBarOrientation: newStatusBarOrientation, duration: duration) }
     }
 
-    @available(iOS 2.0, *)
+    @available(iOS, introduced: 2.0, deprecated: 13.0)
     open func application(_ application: UIApplication, didChangeStatusBarOrientation oldStatusBarOrientation: UIInterfaceOrientation) {
         plugins.forEach { $0.application?(application, didChangeStatusBarOrientation: oldStatusBarOrientation) }
     }
 
-    @available(iOS 2.0, *)
+    @available(iOS, introduced: 2.0, deprecated: 13.0)
     open func application(_ application: UIApplication, willChangeStatusBarFrame newStatusBarFrame: CGRect) {
         plugins.forEach { $0.application?(application, willChangeStatusBarFrame: newStatusBarFrame) }
     }
 
-    @available(iOS 2.0, *)
+    @available(iOS, introduced: 2.0, deprecated: 13.0)
     open func application(_ application: UIApplication, didChangeStatusBarFrame oldStatusBarFrame: CGRect) {
         plugins.forEach { $0.application?(application, didChangeStatusBarFrame: oldStatusBarFrame) }
     }
 
     @available(iOS, introduced: 8.0, deprecated: 10.0)
     open func application(_ application: UIApplication, didRegister notificationSettings: UIUserNotificationSettings) {
-        fatalError("Please use UNUserNotificationCenter.requestAuthorization(options:completionHandler:).")
+        plugins.forEach { $0.application?(application, didRegister: notificationSettings) }
     }
 
     @available(iOS 3.0, *)
@@ -164,34 +155,63 @@ open class AppDelegate: UIResponder, UIApplicationDelegate {
 
     @available(iOS, introduced: 3.0, deprecated: 10.0)
     open func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any]) {
-        fatalError("Please use UNUserNotificationCenterDelegate.userNotificationCenter(_:willPresent:withCompletionHandler:) or UNUserNotificationCenterDelegate.userNotificationCenter(_:didReceive:withCompletionHandler:) for user visible notifications and application(_:didReceiveRemoteNotification:,fetchCompletionHandler:) for silent remote notifications.")
+        plugins.forEach { $0.application?(application, didReceiveRemoteNotification: userInfo) }
     }
 
     @available(iOS, introduced: 4.0, deprecated: 10.0)
     open func application(_ application: UIApplication, didReceive notification: UILocalNotification) {
-        fatalError("Please use UNUserNotificationCenterDelegate.userNotificationCenter(_:willPresent:withCompletionHandler:) or UNUserNotificationCenterDelegate.userNotificationCenter(_:didReceive:withCompletionHandler:).")
+        plugins.forEach { $0.application?(application, didReceive: notification) }
     }
 
     @available(iOS, introduced: 8.0, deprecated: 10.0)
     open func application(_ application: UIApplication, handleActionWithIdentifier identifier: String?, for notification: UILocalNotification, completionHandler: @escaping () -> Void) {
-        fatalError("Please use UNUserNotificationCenterDelegate.userNotificationCenter(_:didReceive:withCompletionHandler:).")
+        evaluate(
+            work: { appDelegate, completionHandler in
+                appDelegate.application?(application, handleActionWithIdentifier: identifier, for: notification) { completionHandler(()) }
+            },
+            completionHandler: { _ in
+                completionHandler()
+            }
+        )
     }
 
     @available(iOS, introduced: 9.0, deprecated: 10.0)
     open func application(_ application: UIApplication, handleActionWithIdentifier identifier: String?, forRemoteNotification userInfo: [AnyHashable: Any], withResponseInfo responseInfo: [AnyHashable: Any], completionHandler: @escaping () -> Void) {
-        fatalError("Please use UNUserNotificationCenterDelegate.userNotificationCenter(_:didReceive:withCompletionHandler:).")
+        evaluate(
+            work: { appDelegate, completionHandler in
+                appDelegate.application?(application, handleActionWithIdentifier: identifier, forRemoteNotification: userInfo, withResponseInfo: responseInfo) { completionHandler(()) }
+            },
+            completionHandler: { _ in
+                completionHandler()
+            }
+        )
     }
 
     @available(iOS, introduced: 8.0, deprecated: 10.0)
     open func application(_ application: UIApplication, handleActionWithIdentifier identifier: String?, forRemoteNotification userInfo: [AnyHashable: Any], completionHandler: @escaping () -> Void) {
-        fatalError("Please use UNUserNotificationCenterDelegate.userNotificationCenter(_:didReceive:withCompletionHandler:).")
+        evaluate(
+            work: { appDelegate, completionHandler in
+                appDelegate.application?(application, handleActionWithIdentifier: identifier, forRemoteNotification: userInfo) { completionHandler(()) }
+            },
+            completionHandler: { _ in
+                completionHandler()
+            }
+        )
     }
 
     @available(iOS, introduced: 9.0, deprecated: 10.0)
     open func application(_ application: UIApplication, handleActionWithIdentifier identifier: String?, for notification: UILocalNotification, withResponseInfo responseInfo: [AnyHashable: Any], completionHandler: @escaping () -> Void) {
-        fatalError("Please use UNUserNotificationCenterDelegate.userNotificationCenter(_:didReceive:withCompletionHandler:).")
+        evaluate(
+            work: { appDelegate, completionHandler in
+                appDelegate.application?(application, handleActionWithIdentifier: identifier, for: notification, withResponseInfo: responseInfo) { completionHandler(()) }
+            },
+            completionHandler: { _ in
+                completionHandler()
+            }
+        )
     }
 
+    #if REMOTE_NOTIFICATION
     @available(iOS 7.0, *)
     open func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
         evaluate(
@@ -204,8 +224,10 @@ open class AppDelegate: UIResponder, UIApplicationDelegate {
             }
         )
     }
+    #endif
 
-    @available(iOS 7.0, *)
+    #if FETCH
+    @available(iOS, introduced: 7.0, deprecated: 13.0)
     open func application(_ application: UIApplication, performFetchWithCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
         evaluate(
             work: {
@@ -217,6 +239,7 @@ open class AppDelegate: UIResponder, UIApplicationDelegate {
             }
         )
     }
+    #endif
 
     @available(iOS 9.0, *)
     open func application(_ application: UIApplication, performActionFor shortcutItem: UIApplicationShortcutItem, completionHandler: @escaping (Bool) -> Void) {
@@ -322,6 +345,7 @@ open class AppDelegate: UIResponder, UIApplicationDelegate {
         return viewControllers.last
     }
 
+    #if APPLICATION_STATE
     @available(iOS 6.0, *)
     open func application(_ application: UIApplication, shouldSaveApplicationState coder: NSCoder) -> Bool {
         return plugins.reduce(false, { $0 || ($1.application?(application, shouldSaveApplicationState: coder) ?? false) })
@@ -341,6 +365,7 @@ open class AppDelegate: UIResponder, UIApplicationDelegate {
     open func application(_ application: UIApplication, didDecodeRestorableStateWith coder: NSCoder) {
         plugins.forEach { $0.application?(application, didDecodeRestorableStateWith: coder) }
     }
+    #endif
 
     @available(iOS 8.0, *)
     open func application(_ application: UIApplication, willContinueUserActivityWithType userActivityType: String) -> Bool {
@@ -375,4 +400,17 @@ open class AppDelegate: UIResponder, UIApplicationDelegate {
     open func application(_ application: UIApplication, userDidAcceptCloudKitShareWith cloudKitShareMetadata: CKShare.Metadata) {
         plugins.forEach { $0.application?(application, userDidAcceptCloudKitShareWith: cloudKitShareMetadata) }
     }
+
+    #if SCENE
+    @available(iOS 13.0, *)
+    open func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
+        let sceneConfigurations = plugins.compactMap { $0.application?(application, configurationForConnecting: connectingSceneSession, options: options) }
+        return sceneConfigurations.last!
+    }
+
+    @available(iOS 13.0, *)
+    open func application(_ application: UIApplication, didDiscardSceneSessions sceneSessions: Set<UISceneSession>) {
+        plugins.forEach { $0.application?(application, didDiscardSceneSessions: sceneSessions) }
+    }
+    #endif
 }

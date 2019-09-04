@@ -1,0 +1,15 @@
+cache:
+  directories:
+    - summon
+os: osx
+language: objective-c
+osx_image: xcode11
+install: executable/init
+script:
+  - summon/bin tuist generate
+  - xcodebuild build -workspace AppDelegate.xcworkspace -scheme AppDelegate -sdk iphonesimulator
+deploy:
+  provider: script
+  script: pod trunk push
+  on:
+    tags: true
