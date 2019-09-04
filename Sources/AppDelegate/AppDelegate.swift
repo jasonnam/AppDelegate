@@ -403,4 +403,15 @@ open class AppDelegate: UIResponder, UIApplicationDelegate {
     open func application(_ application: UIApplication, userDidAcceptCloudKitShareWith cloudKitShareMetadata: CKShare.Metadata) {
         plugins.forEach { $0.application?(application, userDidAcceptCloudKitShareWith: cloudKitShareMetadata) }
     }
+
+    @available(iOS 13.0, *)
+    open func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
+        let sceneConfigurations = plugins.compactMap { $0.application?(application, configurationForConnecting: connectingSceneSession, options: options) }
+        return sceneConfigurations.last!
+    }
+
+    @available(iOS 13.0, *)
+    open func application(_ application: UIApplication, didDiscardSceneSessions sceneSessions: Set<UISceneSession>) {
+        plugins.forEach { $0.application?(application, didDiscardSceneSessions: sceneSessions) }
+    }
 }
