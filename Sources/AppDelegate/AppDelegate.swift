@@ -34,15 +34,6 @@ open class AppDelegate: UIResponder, UIApplicationDelegate {
 
     open var window: UIWindow?
 
-    public override init() {
-        super.init()
-    }
-
-    public init(window: UIWindow) {
-        super.init()
-        self.window = window
-    }
-
     @discardableResult
     open func evaluate<Result, Return>(work: (UIApplicationDelegate, @escaping (Result) -> Void) -> Return?, completionHandler: @escaping ([Result]) -> Void) -> [Return] {
         let dispatchGroup = DispatchGroup()
