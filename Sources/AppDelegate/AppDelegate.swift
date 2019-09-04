@@ -74,7 +74,7 @@ open class AppDelegate: UIResponder, UIApplicationDelegate {
 
     @available(iOS 2.0, *)
     open func applicationDidFinishLaunching(_ application: UIApplication) {
-        fatalError("Please use application(_:willFinishLaunchingWithOptions:) and application(_:didFinishLaunchingWithOptions:).")
+        plugins.forEach { $0.applicationDidFinishLaunching?(application) }
     }
 
     @available(iOS 6.0, *)
@@ -99,12 +99,12 @@ open class AppDelegate: UIResponder, UIApplicationDelegate {
 
     @available(iOS, introduced: 2.0, deprecated: 9.0)
     open func application(_ application: UIApplication, handleOpen url: URL) -> Bool {
-        fatalError("Please use application(_:open:options:).")
+        return plugins.reduce(false, { $0 || ($1.application?(application, handleOpen: url) ?? false) })
     }
 
     @available(iOS, introduced: 4.2, deprecated: 9.0)
     open func application(_ application: UIApplication, open url: URL, sourceApplication: String?, annotation: Any) -> Bool {
-        fatalError("Please use application(_:open:options:).")
+        return plugins.reduce(false, { $0 || ($1.application?(application, open: url, sourceApplication: sourceApplication, annotation: annotation) ?? false) })
     }
 
     @available(iOS 9.0, *)
@@ -149,7 +149,7 @@ open class AppDelegate: UIResponder, UIApplicationDelegate {
 
     @available(iOS, introduced: 8.0, deprecated: 10.0)
     open func application(_ application: UIApplication, didRegister notificationSettings: UIUserNotificationSettings) {
-        fatalError("Please use UNUserNotificationCenter.requestAuthorization(options:completionHandler:).")
+        plugins.forEach { $0.application?(application, didRegister: notificationSettings) }
     }
 
     @available(iOS 3.0, *)
@@ -164,32 +164,60 @@ open class AppDelegate: UIResponder, UIApplicationDelegate {
 
     @available(iOS, introduced: 3.0, deprecated: 10.0)
     open func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any]) {
-        fatalError("Please use UNUserNotificationCenterDelegate.userNotificationCenter(_:willPresent:withCompletionHandler:) or UNUserNotificationCenterDelegate.userNotificationCenter(_:didReceive:withCompletionHandler:) for user visible notifications and application(_:didReceiveRemoteNotification:,fetchCompletionHandler:) for silent remote notifications.")
+        plugins.forEach { $0.application?(application, didReceiveRemoteNotification: userInfo) }
     }
 
     @available(iOS, introduced: 4.0, deprecated: 10.0)
     open func application(_ application: UIApplication, didReceive notification: UILocalNotification) {
-        fatalError("Please use UNUserNotificationCenterDelegate.userNotificationCenter(_:willPresent:withCompletionHandler:) or UNUserNotificationCenterDelegate.userNotificationCenter(_:didReceive:withCompletionHandler:).")
+        plugins.forEach { $0.application?(application, didReceive: notification) }
     }
 
     @available(iOS, introduced: 8.0, deprecated: 10.0)
     open func application(_ application: UIApplication, handleActionWithIdentifier identifier: String?, for notification: UILocalNotification, completionHandler: @escaping () -> Void) {
-        fatalError("Please use UNUserNotificationCenterDelegate.userNotificationCenter(_:didReceive:withCompletionHandler:).")
+        evaluate(
+            work: { appDelegate, completionHandler in
+                appDelegate.application?(application, handleActionWithIdentifier: identifier, for: notification) { completionHandler(()) }
+            },
+            completionHandler: { _ in
+                completionHandler()
+            }
+        )
     }
 
     @available(iOS, introduced: 9.0, deprecated: 10.0)
     open func application(_ application: UIApplication, handleActionWithIdentifier identifier: String?, forRemoteNotification userInfo: [AnyHashable: Any], withResponseInfo responseInfo: [AnyHashable: Any], completionHandler: @escaping () -> Void) {
-        fatalError("Please use UNUserNotificationCenterDelegate.userNotificationCenter(_:didReceive:withCompletionHandler:).")
+        evaluate(
+            work: { appDelegate, completionHandler in
+                appDelegate.application?(application, handleActionWithIdentifier: identifier, forRemoteNotification: userInfo, withResponseInfo: responseInfo) { completionHandler(()) }
+            },
+            completionHandler: { _ in
+                completionHandler()
+            }
+        )
     }
 
     @available(iOS, introduced: 8.0, deprecated: 10.0)
     open func application(_ application: UIApplication, handleActionWithIdentifier identifier: String?, forRemoteNotification userInfo: [AnyHashable: Any], completionHandler: @escaping () -> Void) {
-        fatalError("Please use UNUserNotificationCenterDelegate.userNotificationCenter(_:didReceive:withCompletionHandler:).")
+        evaluate(
+            work: { appDelegate, completionHandler in
+                appDelegate.application?(application, handleActionWithIdentifier: identifier, forRemoteNotification: userInfo) { completionHandler(()) }
+            },
+            completionHandler: { _ in
+                completionHandler()
+            }
+        )
     }
 
     @available(iOS, introduced: 9.0, deprecated: 10.0)
     open func application(_ application: UIApplication, handleActionWithIdentifier identifier: String?, for notification: UILocalNotification, withResponseInfo responseInfo: [AnyHashable: Any], completionHandler: @escaping () -> Void) {
-        fatalError("Please use UNUserNotificationCenterDelegate.userNotificationCenter(_:didReceive:withCompletionHandler:).")
+        evaluate(
+            work: { appDelegate, completionHandler in
+                appDelegate.application?(application, handleActionWithIdentifier: identifier, for: notification, withResponseInfo: responseInfo) { completionHandler(()) }
+            },
+            completionHandler: { _ in
+                completionHandler()
+            }
+        )
     }
 
     @available(iOS 7.0, *)
