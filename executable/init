@@ -1,0 +1,2 @@
+#!/bin/sh -e
+curl -L https://raw.githubusercontent.com/summonbin/core/0.1.8/scripts/init.sh | sh
