@@ -220,6 +220,7 @@ open class AppDelegate: UIResponder, UIApplicationDelegate {
         )
     }
 
+    #if REMOTE_NOTIFICATION
     @available(iOS 7.0, *)
     open func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
         evaluate(
@@ -232,7 +233,9 @@ open class AppDelegate: UIResponder, UIApplicationDelegate {
             }
         )
     }
+    #endif
 
+    #if FETCH
     @available(iOS, introduced: 7.0, deprecated: 13.0)
     open func application(_ application: UIApplication, performFetchWithCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
         evaluate(
@@ -245,6 +248,7 @@ open class AppDelegate: UIResponder, UIApplicationDelegate {
             }
         )
     }
+    #endif
 
     @available(iOS 9.0, *)
     open func application(_ application: UIApplication, performActionFor shortcutItem: UIApplicationShortcutItem, completionHandler: @escaping (Bool) -> Void) {
@@ -350,6 +354,7 @@ open class AppDelegate: UIResponder, UIApplicationDelegate {
         return viewControllers.last
     }
 
+    #if APPLICATION_STATE
     @available(iOS 6.0, *)
     open func application(_ application: UIApplication, shouldSaveApplicationState coder: NSCoder) -> Bool {
         return plugins.reduce(false, { $0 || ($1.application?(application, shouldSaveApplicationState: coder) ?? false) })
@@ -369,6 +374,7 @@ open class AppDelegate: UIResponder, UIApplicationDelegate {
     open func application(_ application: UIApplication, didDecodeRestorableStateWith coder: NSCoder) {
         plugins.forEach { $0.application?(application, didDecodeRestorableStateWith: coder) }
     }
+    #endif
 
     @available(iOS 8.0, *)
     open func application(_ application: UIApplication, willContinueUserActivityWithType userActivityType: String) -> Bool {
@@ -404,6 +410,7 @@ open class AppDelegate: UIResponder, UIApplicationDelegate {
         plugins.forEach { $0.application?(application, userDidAcceptCloudKitShareWith: cloudKitShareMetadata) }
     }
 
+    #if SCENE
     @available(iOS 13.0, *)
     open func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
         let sceneConfigurations = plugins.compactMap { $0.application?(application, configurationForConnecting: connectingSceneSession, options: options) }
@@ -414,4 +421,5 @@ open class AppDelegate: UIResponder, UIApplicationDelegate {
     open func application(_ application: UIApplication, didDiscardSceneSessions sceneSessions: Set<UISceneSession>) {
         plugins.forEach { $0.application?(application, didDiscardSceneSessions: sceneSessions) }
     }
+    #endif
 }
