@@ -127,22 +127,22 @@ open class AppDelegate: UIResponder, UIApplicationDelegate {
         plugins.forEach { $0.applicationSignificantTimeChange?(application) }
     }
 
-    @available(iOS 2.0, *)
+    @available(iOS, introduced: 2.0, deprecated: 13.0)
     open func application(_ application: UIApplication, willChangeStatusBarOrientation newStatusBarOrientation: UIInterfaceOrientation, duration: TimeInterval) {
         plugins.forEach { $0.application?(application, willChangeStatusBarOrientation: newStatusBarOrientation, duration: duration) }
     }
 
-    @available(iOS 2.0, *)
+    @available(iOS, introduced: 2.0, deprecated: 13.0)
     open func application(_ application: UIApplication, didChangeStatusBarOrientation oldStatusBarOrientation: UIInterfaceOrientation) {
         plugins.forEach { $0.application?(application, didChangeStatusBarOrientation: oldStatusBarOrientation) }
     }
 
-    @available(iOS 2.0, *)
+    @available(iOS, introduced: 2.0, deprecated: 13.0)
     open func application(_ application: UIApplication, willChangeStatusBarFrame newStatusBarFrame: CGRect) {
         plugins.forEach { $0.application?(application, willChangeStatusBarFrame: newStatusBarFrame) }
     }
 
-    @available(iOS 2.0, *)
+    @available(iOS, introduced: 2.0, deprecated: 13.0)
     open func application(_ application: UIApplication, didChangeStatusBarFrame oldStatusBarFrame: CGRect) {
         plugins.forEach { $0.application?(application, didChangeStatusBarFrame: oldStatusBarFrame) }
     }
@@ -233,7 +233,7 @@ open class AppDelegate: UIResponder, UIApplicationDelegate {
         )
     }
 
-    @available(iOS 7.0, *)
+    @available(iOS, introduced: 7.0, deprecated: 13.0)
     open func application(_ application: UIApplication, performFetchWithCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
         evaluate(
             work: {
