@@ -12,7 +12,12 @@ let project = Project(
             sources: [
                 "Debug/AppDelegateMain.swift",
                 "Sources/AppDelegate/**"
-            ]
+            ],
+            settings: .init(
+                base: [
+                    "OTHER_SWIFT_FLAGS": "-DREMOTE_NOTIFICATION -DFETCH -DAPPLICATION_STATE -DSCENE"
+                ]
+            )
         )
     ]
 )
